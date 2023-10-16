@@ -35,6 +35,7 @@ const adminMenu = [
     {
         label: 'User',
         items: [
+            { label: 'Laporan', icon: 'pi pi-fw pi-file', to: '/user/laporan' },
             { label: 'Pengaturan User', icon: 'pi pi-fw pi-user', to: '/user' },
         ]
     },

@@ -141,6 +141,8 @@ const Crud = () => {
         {label : "Asisten Bidang Perekonomian dan Pembangunan", value : "Asisten Bidang Perekonomian dan Pembangunan"},
         {label : "Pejabat Pelaksana Teknis Kegiatan", value : "Pejabat Pelaksana Teknis Kegiatan"},
         {label : "Bendahara Pengeluaran", value : "Bendahara Pengeluaran"},
+        {label : "Sekretaris Ditjen Pembangunan Daerah", value : "Sekretaris Ditjen Pembangunan Daerah"},
+        {label : "Asisten Deputi Koordinasi Pelaksanaan Kebijakan dan Evaluasi Reformasi Birokrasi, Akuntabilitas Aparatur, dan Pengawasan III", value : "Asisten Deputi Koordinasi Pelaksanaan Kebijakan dan Evaluasi Reformasi Birokrasi, Akuntabilitas Aparatur, dan Pengawasan III"},
     ]
 
     // const responsePejabat = fetchData("/pejabat", fetcher)

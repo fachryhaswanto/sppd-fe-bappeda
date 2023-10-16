@@ -512,6 +512,11 @@ ajv@^6.10.0, ajv@^6.12.3, ajv@^6.12.4:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
+angular-expressions@^1.1.9:
+  version "1.1.9"
+  resolved "https://registry.yarnpkg.com/angular-expressions/-/angular-expressions-1.1.9.tgz#bb99b6fe8416ff98efb00d3d025eb42859649422"
+  integrity sha512-xhjB+fhR9I7J8yR5IRXbcdXk0nMjeB1pHQ+LcOvg3fdTXlviknA1xTvIJRmISw40pcN4og0Cr14w4cQiKRRByg==
+
 ansi-regex@^5.0.1:
   version "5.0.1"
   resolved "https://registry.npmjs.org/ansi-regex/-/ansi-regex-5.0.1.tgz"
