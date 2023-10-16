@@ -144,11 +144,6 @@ const generateDocument = async (pegawaiId) => {
     let pejabat
     pejabat = dataPejabat.data
 
-    console.log(kwitansi)
-    console.log(pejabat)
-    console.log(pejabat.nama)
-    console.log(pejabat.nip)
-
     const sumTotalBayar = kwitansi[0].sumTotalBayar
     const nip = kwitansi[0].nip
     const nama = kwitansi[0].namaPegawai
