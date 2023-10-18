@@ -66,7 +66,10 @@ const Laporan = () => {
 
     const testFunction = async (pegawaiId) => {
         setLoading(true)
-        await generateDocument(pegawaiId)
+        const value = await generateDocument(pegawaiId)
+        if (value == "test") {
+          toast.current.show({ severity: 'error', summary: 'Kesalahan', detail: 'Data atas pegawai tersebut kosong', life: 3000 });
+        }
         setLoading(false)
     }
 
@@ -141,13 +144,17 @@ const generateDocument = async (pegawaiId) => {
     let kwitansi
     kwitansi = dataKwitansi.data
 
+    if (kwitansi === null) {
+      const value = "test"
+      return value
+    }
+
     let pejabat
     pejabat = dataPejabat.data
 
     const sumTotalBayar = kwitansi[0].sumTotalBayar
     const nip = kwitansi[0].nip
     const nama = kwitansi[0].namaPegawai
-
 
     loadFile(`/document/laporan-formatted.docx`, function (
       error,
