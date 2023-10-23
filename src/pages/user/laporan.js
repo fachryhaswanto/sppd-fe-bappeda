@@ -11,7 +11,8 @@ import { Toast } from 'primereact/toast';
 import axios from 'axios';
 import Docxtemplater from "docxtemplater";
 import PizZip from "pizzip";
-import { saveAs } from "file-saver";
+import * as FileSaver from 'file-saver'
+import XLSX from 'sheetjs-style'
 
 const Laporan = () => {
     const router = useRouter()
@@ -66,10 +67,14 @@ const Laporan = () => {
 
     const testFunction = async (pegawaiId) => {
         setLoading(true)
+
         const value = await generateDocument(pegawaiId)
         if (value == "test") {
           toast.current.show({ severity: 'error', summary: 'Kesalahan', detail: 'Data atas pegawai tersebut kosong', life: 3000 });
         }
+
+        // await generateExcel()
+
         setLoading(false)
     }
 
@@ -214,3 +219,36 @@ const generateDocument = async (pegawaiId) => {
       saveAs(out, `laporan-perjadin-${nama}.docx`);
     });
   };
+
+//generate Excel Report
+// const generateExcel = async () => {
+//     const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+//     const fileExtension = '.xlsx'
+
+//     const excelData = [
+//       {
+//         "First Name" : "Arul",
+//         "Last Name" : "prasath",
+//         "Employee Code" : "001",
+//         "DOB" : "01-01-1995",
+//         "Address" : "Chennai"
+//       },
+//       {
+//         "First Name" : "Balu",
+//         "Last Name" : "Subramani",
+//         "Employee Code" : "002",
+//         "DOB" : "02-02-2000",
+//         "Address" : "Cbe"
+//       }
+//     ]
+
+//     console.log(excelData[0])
+
+//     const ws = XLSX.utils.json_to_sheet(excelData[0])
+//     const wb = {Sheets: {'data' : ws}, SheetNames:['data']};
+    
+//     const excelBuffer = XLSX.write(wb, {bookType: 'xlsx', type: 'array'})
+//     const data = new Blob([excelBuffer], {type: fileType})
+//     FileSaver.saveAs(data, "test.xlsx")
+    
+// }
