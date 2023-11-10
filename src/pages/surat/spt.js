@@ -138,6 +138,8 @@ const Crud = () => {
                 getBidang()
                 getSubKegiatan()
                 setSession(responseSession.data)
+            } else {
+                router.push("/")    
             }
         } catch (error) {
             router.push("/")
