@@ -95,6 +95,7 @@ const Crud = () => {
     const dt = useRef(null);
     const contextPath = getConfig().publicRuntimeConfig.contextPath;
 
+    const [noSppd, setNoSppd] = useState(null)
     const [tahun, setTahun] = useState(null);
     const tahuns = [
         {option: "2023", value: "2023"},
@@ -167,7 +168,48 @@ const Crud = () => {
         } else {
             getSppd(id)
         }
+        setNoSppd("")
         setTahun(tahun)
+    }
+
+    const getSppdByNomorSppd = async (nomorSppd) => {
+        const id = session.id
+
+        if (nomorSppd) {
+            if (id === 8) {
+                const responseSppd = ""
+                if (tahun) {
+                    responseSppd = await axios.get(process.env.NEXT_PUBLIC_BASE_URL_API + `/sppd/search?nomor_sppd=${nomorSppd}&tahun=${tahun}`, {withCredentials: true})
+                } else {
+                    responseSppd = await axios.get(process.env.NEXT_PUBLIC_BASE_URL_API + `/sppd/search?nomor_sppd=${nomorSppd}`, {withCredentials: true})
+                }
+                if (responseSppd.data) {
+                    setSppds(responseSppd.data)
+                    setDisabledTombol(true)
+                } else {
+                    setSppds(null)
+                    setDisabledTombol(true)
+                }
+                setLoading(false)
+            } else {
+                const responseSppd = ""
+                if (tahun) {
+                    responseSppd = await axios.get(process.env.NEXT_PUBLIC_BASE_URL_API + `/sppd/search?userId=${id}&nomor_sppd=${nomorSppd}&tahun=${tahun}`, {withCredentials: true})
+                } else {
+                    responseSppd = await axios.get(process.env.NEXT_PUBLIC_BASE_URL_API + `/sppd/search?userId=${id}&nomor_sppd=${nomorSppd}`, {withCredentials: true})
+                }
+                if (responseSppd.data) {
+                    setSppds(responseSppd.data)
+                    setLoading(false)
+                } else {
+                    setSppds(null)
+                    setLoading(false)
+                }
+            }
+        } else {
+            getSppd(id)
+            setTahun(null)
+        }
     }
 
     const getSpt = async (id) => {
@@ -204,7 +246,6 @@ const Crud = () => {
 
     useEffect(() => {
         getSession()
-        initFilter();
     }, []);
 
     const openNew = () => {
@@ -777,19 +818,25 @@ const Crud = () => {
         }
     }
 
-    const initFilter = () => {
-        setFilter({
-            'global' : {value : null, matchMode : FilterMatchMode.CONTAINS}
-        })
-    }
+    // const initFilter = () => {
+    //     setFilter({
+    //         'global' : {value : null, matchMode : FilterMatchMode.CONTAINS}
+    //     })
+    // }
 
-    const onGlobalFilterChange = (e) => {
-        const value = e.target.value;
-        let _filter = { ...filter };
-        _filter['global'].value = value;
+    // const onGlobalFilterChange = (e) => {
+    //     const value = e.target.value;
+    //     let _filter = { ...filter };
+    //     _filter['global'].value = value;
 
-        setFilter(_filter);
-        setGlobalFilter(value);
+    //     setFilter(_filter);
+    //     setGlobalFilter(value);
+    // }
+
+    const onNoSppdOnChange = (e) => {
+        const value = e.target.value
+        
+        setNoSppd(value);
     }
 
     const header = (
@@ -797,7 +844,8 @@ const Crud = () => {
             <h5 className="m-0">Data SPPD</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
-                <InputText value={globalFilter} onChange={onGlobalFilterChange} placeholder="Cari..." />
+                <InputText value={noSppd} onChange={onNoSppdOnChange} placeholder="Cari nomor SPPD" />
+                <Button label="Cari" className="p-button-text p-button-raised ml-2" onClick={() => getSppdByNomorSppd(noSppd)} />
             </span>
         </div>
     );

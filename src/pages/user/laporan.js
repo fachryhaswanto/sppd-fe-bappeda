@@ -22,6 +22,12 @@ const Laporan = () => {
     const [dataUser, setDataUser] = useState(null)
     const [dataUserDrop, setDataUserDrop] = useState(null)    
 
+    const [tahun, setTahun] = useState("")
+    const tahunDrop = [
+      {option: "2023", value: "2023"},
+      {option: "2024", value: "2024"}
+  ]
+
     const [showDropdown, setShowDropdown] = useState(null)
     const [disabledTombolUbah, setDisabledTombolUbah] = useState(true)
     const [loading, setLoading] = useState(false)
@@ -65,10 +71,10 @@ const Laporan = () => {
         }
     }
 
-    const testFunction = async (pegawaiId) => {
+    const generateDocumentPegawai = async (pegawaiId, tahun) => {
         setLoading(true)
 
-        const value = await generateDocument(pegawaiId)
+        const value = await generateDocument(pegawaiId, tahun)
         if (value == "test") {
           toast.current.show({ severity: 'error', summary: 'Kesalahan', detail: 'Data atas pegawai tersebut kosong', life: 3000 });
         }
@@ -87,7 +93,11 @@ const Laporan = () => {
             <div className="col-12 md:col-6">
                 <div className="card p-fluid">
                     <Toast ref={toast} />
-                    <h3>Generate Laporan</h3>
+                    <h3>Generate Laporan Pegawai</h3>
+                            <div className="field">
+                                <Dropdown value={tahun} options={tahunDrop} onChange={(e) => setTahun(e.target.value)} optionLabel="option" optionValue="value" placeholder="Pilih tahun" required className={classNames({ 'p-invalid': submitted && !tahun })} />
+                                {submitted && !tahun && <small className="p-invalid">Tahun harus dipilih</small>}
+                            </div>  
                         {showDropdown && (
                             <div className="field">
                                 <Dropdown value={dataUser} options={dataUserDrop} onChange={(e) => setDataUser(e.value)} optionLabel="option" optionValue="value" placeholder="Pilih pegawai" required filter filterBy='option' className={classNames({ 'p-invalid': submitted && !dataUser })} />
@@ -95,7 +105,7 @@ const Laporan = () => {
                             </div>  
                         )}
                     <div className="field">
-                        <Button label="Generate" disabled={dataUser ? false : true} onClick={() => testFunction(dataUser)} loading={loading} />
+                        <Button label="Generate" disabled={dataUser && tahun ? false : true} onClick={() => generateDocumentPegawai(dataUser, tahun)} loading={loading} />
                     </div>
                 </div>
             </div>
@@ -122,7 +132,7 @@ function loadFile(url, callback) {
 }
 
 //TEMPLATING DOCUMENT
-const generateDocument = async (pegawaiId) => {
+const generateDocument = async (pegawaiId, tahun) => {
 
     const tahunReverse = (string) => {
         return string.split('/').reverse().join('/')
@@ -139,10 +149,10 @@ const generateDocument = async (pegawaiId) => {
     // let tahun = new Date().getFullYear()
 
     try {
-        dataKwitansi = await axios.get(process.env.NEXT_PUBLIC_BASE_URL_API + `/kwitansi/laporan?pegawaiId=${pegawaiId}&spt=true`, {withCredentials:true})
+        dataKwitansi = await axios.get(process.env.NEXT_PUBLIC_BASE_URL_API + `/kwitansi/laporan?pegawaiId=${pegawaiId}&tahun=${tahun}&spt=true`, {withCredentials:true})
 
         dataPejabat = await axios.get(process.env.NEXT_PUBLIC_BASE_URL_API + `/pejabat/search?jabatan=Kepala BAPPEDA`, {withCredentials:true})
-    } catch (error) {
+    } catch (error) { 
         console.error(error)
     }   
 
@@ -220,35 +230,98 @@ const generateDocument = async (pegawaiId) => {
     });
   };
 
-//generate Excel Report
-// const generateExcel = async () => {
-//     const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-//     const fileExtension = '.xlsx'
+const generateDocumentSubKegiatan = async (pegawaiId) => {
+  
+  const tahunReverse = (string) => {
+      return string.split('/').reverse().join('/')
+  }
 
-//     const excelData = [
-//       {
-//         "First Name" : "Arul",
-//         "Last Name" : "prasath",
-//         "Employee Code" : "001",
-//         "DOB" : "01-01-1995",
-//         "Address" : "Chennai"
-//       },
-//       {
-//         "First Name" : "Balu",
-//         "Last Name" : "Subramani",
-//         "Employee Code" : "002",
-//         "DOB" : "02-02-2000",
-//         "Address" : "Cbe"
-//       }
-//     ]
+  let dataKwitansi
+  let dataPejabat
 
-//     console.log(excelData[0])
+  // let arrdDitugaskan = JSON.parse(rowData.ditugaskan)
+  // let dataDitugaskanPromise = []
+  // let dataFDitugaskan = []
+  // let ditugaskan = []
+  // let tanggal = tahunReverse(rowData.tanggal_spt)
+  // let tahun = new Date().getFullYear()
 
-//     const ws = XLSX.utils.json_to_sheet(excelData[0])
-//     const wb = {Sheets: {'data' : ws}, SheetNames:['data']};
-    
-//     const excelBuffer = XLSX.write(wb, {bookType: 'xlsx', type: 'array'})
-//     const data = new Blob([excelBuffer], {type: fileType})
-//     FileSaver.saveAs(data, "test.xlsx")
-    
-// }
+  try {
+      dataKwitansi = await axios.get(process.env.NEXT_PUBLIC_BASE_URL_API + `/kwitansi/laporan?pegawaiId=${pegawaiId}&spt=true`, {withCredentials:true})
+
+      dataPejabat = await axios.get(process.env.NEXT_PUBLIC_BASE_URL_API + `/pejabat/search?jabatan=Kepala BAPPEDA`, {withCredentials:true})
+  } catch (error) { 
+      console.error(error)
+  }   
+
+  let kwitansi
+  kwitansi = dataKwitansi.data
+
+  if (kwitansi === null) {
+    const value = "test"
+    return value
+  }
+
+  let pejabat
+  pejabat = dataPejabat.data
+
+  const sumTotalBayar = kwitansi[0].sumTotalBayar
+
+  loadFile(`/document/laporansubkegiatan-formatted.docx`, function (
+    error,
+    content
+  ) {
+    if (error) {
+      throw error;
+    }
+    var zip = new PizZip(content);
+    var doc = new Docxtemplater().loadZip(zip);
+    doc.setData({
+      dataLaporan: kwitansi,
+      sumTotalBayar: sumTotalBayar,
+      nip: nip,
+      nama: nama,
+      namaKepalaBappeda: pejabat[0].nama,
+      nipKepalaBappeda: pejabat[0].nip
+    });
+    try {
+      // render the document (replace all occurences of {first_name} by John, {last_name} by Doe, ...)
+      doc.render();
+    } catch (error) {
+      // The error thrown here contains additional information when logged with JSON.stringify (it contains a properties object containing all suberrors).
+      function replaceErrors(key, value) {
+        if (value instanceof Error) {
+          return Object.getOwnPropertyNames(value).reduce(function (
+            error,
+            key
+          ) {
+            error[key] = value[key];
+            return error;
+          },
+          {});
+        }
+        return value;
+      }
+      console.log(JSON.stringify({ error: error }, replaceErrors));
+
+      if (error.properties && error.properties.errors instanceof Array) {
+        const errorMessages = error.properties.errors
+          .map(function (error) {
+            return error.properties.explanation;
+          })
+          .join("\n");
+        console.log("errorMessages", errorMessages);
+        // errorMessages is a humanly readable message looking like this :
+        // 'The tag beginning with "foobar" is unopened'
+      }
+      throw error;
+    }
+    var out = doc.getZip().generate({
+      type: "blob",
+      mimeType:
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    }); 
+    // Output the document using Data-URI
+    saveAs(out, `laporan-perjadin-${nama}.docx`);
+  });
+};

@@ -90,6 +90,7 @@ const Crud = () => {
     const dt = useRef(null);
     const contextPath = getConfig().publicRuntimeConfig.contextPath;
     
+    const [noKwitansi, setNoKwitansi] = useState(null)
     const [tahun, setTahun] = useState(null);
     const tahuns = [
         {option: "2023", value: "2023"},
@@ -156,6 +157,48 @@ const Crud = () => {
             getKwitansi(id)
         }
         setTahun(tahun)
+        setNoKwitansi("")
+    }
+
+    const getKwitansiByNomorKwitansi = async (nomorKwitansi) => {
+        const id = session.id
+
+        if (nomorKwitansi) {
+            if (id === 8) {
+                const responseKwitansi = "";
+                if (tahun) {
+                    responseKwitansi = await axios.get(process.env.NEXT_PUBLIC_BASE_URL_API + `/kwitansi/search?nomorKwitansi=${nomorKwitansi}&tahun=${tahun}`, {withCredentials: true})   
+                } else {
+                    responseKwitansi = await axios.get(process.env.NEXT_PUBLIC_BASE_URL_API + `/kwitansi/search?nomorKwitansi=${nomorKwitansi}`, {withCredentials: true})
+                }
+
+                if (responseKwitansi.data) {
+                    setKwitansis(responseKwitansi.data)
+                } else {
+                    setKwitansis(null)
+                }
+                setDisabledTombol(true)
+                setLoading(false)
+            } else {
+                const responseKwitansi = ""
+                if (tahun) {
+                    responseKwitansi = await axios.get(process.env.NEXT_PUBLIC_BASE_URL_API + `/kwitansi/search?userId=${id}&nomorKwitansi=${nomorKwitansi}&tahun=${tahun}`, {withCredentials: true})
+                } else {
+                    responseKwitansi = await axios.get(process.env.NEXT_PUBLIC_BASE_URL_API + `/kwitansi/search?userId=${id}&nomorKwitansi=${nomorKwitansi}`, {withCredentials: true})
+                }
+
+                if (responseKwitansi.data) {
+                    setKwitansis(responseKwitansi.data)
+                    setLoading(false)
+                } else {
+                    setKwitansis(null)
+                    setLoading(false)
+                }
+            }
+        } else {
+            getKwitansi(id)
+            setTahun(null)
+        }
     }
 
     const getSppd = async (id) => {
@@ -172,7 +215,6 @@ const Crud = () => {
 
     useEffect(() => {
         getSession()
-        initFilter();
     }, []);
 
     const openNew = () => {
@@ -860,19 +902,25 @@ const Crud = () => {
         }
     }
 
-    const initFilter = () => {
-        setFilter({
-            'global' : {value : null, matchMode : FilterMatchMode.CONTAINS}
-        })
-    }
+    // const initFilter = () => {
+    //     setFilter({
+    //         'global' : {value : null, matchMode : FilterMatchMode.CONTAINS}
+    //     })
+    // }
 
-    const onGlobalFilterChange = (e) => {
+    // const onGlobalFilterChange = (e) => {
+    //     const value = e.target.value;
+    //     let _filter = { ...filter };
+    //     _filter['global'].value = value;
+
+    //     setFilter(_filter);
+    //     setGlobalFilter(value);
+    // }
+
+    const noKwitansiOnChange = (e) => {
         const value = e.target.value;
-        let _filter = { ...filter };
-        _filter['global'].value = value;
 
-        setFilter(_filter);
-        setGlobalFilter(value);
+        setNoKwitansi(value)
     }
 
     const header = (
@@ -880,7 +928,8 @@ const Crud = () => {
             <h5 className="m-0">Data Kwitansi</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
-                <InputText value={globalFilter} onChange={onGlobalFilterChange} placeholder="Cari..." />
+                <InputText value={noKwitansi} onChange={noKwitansiOnChange} placeholder="Cari nomor Kwitansi" />
+                <Button label="Cari" className="p-button-text p-button-raised ml-2" onClick={() => getKwitansiByNomorKwitansi(noKwitansi)} />
             </span>
         </div>
     );

@@ -123,6 +123,7 @@ const Crud = () => {
     const contextPath = getConfig().publicRuntimeConfig.contextPath;
 
     const [tahun, setTahun] = useState(null);
+    const [noSpt, setNoSpt] = useState(null);
     const tahuns = [
         {option: "2023", value: "2023"},
         {option: "2024", value: "2024"}
@@ -193,7 +194,49 @@ const Crud = () => {
         } else {
             getSpt(id)
         }
+        setNoSpt("")
         setTahun(tahun)
+    }
+
+    const getSptByNomorSpt = async (nomorSpt) => {
+        const id = session.id
+
+        if (nomorSpt) {                 
+            if (id === 8) {
+                const responseSpt = ""
+                if (tahun) {
+                    responseSpt = await axios.get(process.env.NEXT_PUBLIC_BASE_URL_API + `/spt/search?nomor_spt=${nomorSpt}&tahun=${tahun}`, {withCredentials: true})
+                } else {
+                    responseSpt = await axios.get(process.env.NEXT_PUBLIC_BASE_URL_API + `/spt/search?nomor_spt=${nomorSpt}`, {withCredentials: true})
+                }
+                
+                if (responseSpt.data) {
+                    setSpts(responseSpt.data)
+                    setDisabledTombol(true)
+                } else {
+                    setSpts(null)
+                    setDisabledTombol(true)
+                }
+                setLoading(false)
+            } else {
+                const responseSpt = ""
+                if (tahun) {
+                    responseSpt = await axios.get(process.env.NEXT_PUBLIC_BASE_URL_API + `/spt/search?userId=${id}&nomor_spt=${nomorSpt}&tahun=${tahun}`, {withCredentials: true})
+                } else {
+                    responseSpt = await axios.get(process.env.NEXT_PUBLIC_BASE_URL_API + `/spt/search?userId=${id}&nomor_spt=${nomorSpt}`, {withCredentials: true})
+                }
+
+                if (responseSpt.data) {
+                    setSpts(responseSpt.data)
+                } else {
+                    setSpts(null)
+                }
+                setLoading(false)
+            }
+        } else {
+            getSpt(id)
+            setTahun(null)
+        }
     }
 
     const getPejabat = async () => {
@@ -205,6 +248,8 @@ const Crud = () => {
         }
         setDataPejabatTest(dataPejabat)
     }
+
+    
 
     const getJenisPerjalanan = async () => {
         const responseJenisPerjalanan = await axios.get(process.env.NEXT_PUBLIC_BASE_URL_API + `/rekening`, {withCredentials: true})
@@ -238,7 +283,6 @@ const Crud = () => {
 
     useEffect(() => {
         getSession()
-        initFilter();
     }, []);
 
     const openNew = async () => {
@@ -863,7 +907,7 @@ const Crud = () => {
     const ditugaskanPengikutBodyTemplate = (rowData) => {
         return (
             <>
-                <Button icon="pi pi-users" className="p-button-rounded p-button-info mr-2" onClick={() => openDitugaskanDialog(rowData.id)} tooltip="Pegawai Ditugaskan" tooltipOptions={{position:'top'}} disabled={disabledTombol} />
+                <Button icon="pi pi-users" className="p-button-rounded p-button-info mr-2" onClick={() => openDitugaskanDialog(rowData.id)} tooltip="Pegawai Ditugaskan" tooltipOptions={{position:'top'}} />
             </>
         );
     };
@@ -895,19 +939,25 @@ const Crud = () => {
         );
     };
 
-    const initFilter = () => {
-        setFilter({
-            'global' : {value : null, matchMode : FilterMatchMode.CONTAINS}
-        })
-    }
+    // const initFilter = () => {
+    //     setFilter({
+    //         'global' : {value : null, matchMode : FilterMatchMode.CONTAINS}
+    //     })
+    // }
 
-    const onGlobalFilterChange = (e) => {
+    // const onGlobalFilterChange = (e) => {
+    //     const value = e.target.value;
+    //     let _filter = { ...filter };
+    //     _filter['global'].value = value;
+
+    //     setFilter(_filter);
+    //     setGlobalFilter(value);
+    // }
+
+    const onNoSptOnChange = (e) => {
         const value = e.target.value;
-        let _filter = { ...filter };
-        _filter['global'].value = value;
-
-        setFilter(_filter);
-        setGlobalFilter(value);
+    
+        setNoSpt(value);
     }
 
     const header = (
@@ -915,7 +965,8 @@ const Crud = () => {
             <h5 className="m-0">Data SPT</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
-                <InputText value={globalFilter} onChange={onGlobalFilterChange} placeholder="Cari..." />
+                <InputText value={noSpt} placeholder="Cari Nomor SPT" onChange={(e) => onNoSptOnChange(e)} />
+                <Button label="Cari" disabled={simpanLoading} className="p-button-text p-button-raised ml-2" onClick={() => getSptByNomorSpt(noSpt)} />
             </span>
         </div>
     );
@@ -951,7 +1002,7 @@ const Crud = () => {
     const ditugaskanDialogFooterFilled = (
         <>
             <Button label="Kembali" icon="pi pi-times" disabled={confirmLoading} className="p-button-raised p-button-text" onClick={hideDitugaskanDialog} />
-            <Button label="Ubah Data Ditugaskan" icon="pi pi-check" disabled={disablingEditDataDitugaskan} loading={confirmLoading} className="p-button-raised p-button-text p-button-warning" onClick={showDataDitugaskanDialog} />
+            <Button label="Ubah Data Ditugaskan" icon="pi pi-check" disabled={disablingEditDataDitugaskan || disabledTombol} loading={confirmLoading} className="p-button-raised p-button-text p-button-warning" onClick={showDataDitugaskanDialog} />
         </>
     );
 
